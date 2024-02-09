@@ -31,8 +31,8 @@ ID = 1; %identification digit
 type = "MagMeasure"; %Swarm Type
 %Drone manufacturing instructions
 dType = "Drone_m";
-dPop = 50; 
-dNeed = 10; 
+dPop = 163; 
+dNeed = 80; 
 systems = table(dType,dPop,dNeed);
 %Planetary Body parameters-------------------------------------------------
 PRadius = 6371; %[km] planetary radius
