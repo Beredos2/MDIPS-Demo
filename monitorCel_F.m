@@ -14,7 +14,7 @@ for i = 1:length(S_network)
     for j = 1:length(T)
         bool = checkR(S_network{i}.r(:,j),index,STS_obj);
         if bool == 1
-            M(j,i) = S_network{i}.D_m(j,7);
+            M(j,i) = S_network{i}.D_m(j,4);
         end
     end
 end

@@ -30,32 +30,55 @@ classdef celeBod < handle
                 
         end
         %-------------------------DYNAMICS---------------------------------
-        function Theta_t = getOrientations(CelestialBody,t) %NOTE:Because of how the simulation works, it would be better for the program to calculate all orientations and store them, which can be later used as lookup.
+        function Theta_t = getOrientations(CelestialBody,t) %given in radians
             Theta_x = CelestialBody.Theta_0(1)+CelestialBody.w(1)*t;
             Theta_y = CelestialBody.Theta_0(2)+CelestialBody.w(2)*t;
             Theta_z = CelestialBody.Theta_0(3)+CelestialBody.w(3)*t;
             Theta_t = [Theta_x,Theta_y,Theta_z];
         end
         %------------------------MANETIC FIELD----------------------------%
-        function [XYZ,H,D,I,F] = planetMagField(P_obj,height,latitude,longitude,epoch)
+        function [XYZ,F] = planetMagField(P_obj,height,latitude,longitude,epoch)
             % epoch to decimal year
             d = datetime(epoch,'ConvertFrom','epochtime','Format','yy/MM/dd');
             d = decyear(d);
-            [XYZ,H,D,I,F] = wrldmagm(height,latitude,longitude,d);
-            %Apply perturbation
-            for i=1:3
-                if i==1
-                    XYZ(i) = XYZ(i)+XYZ(i)*0.333*cos(0.01885*epoch);
-                end
-                if i==2 
-                    XYZ(i) = XYZ(i) + XYZ(i)*0.455*cos((pi/15)*epoch);
-                end
-                if i==3
-                    XYZ(i) = XYZ(i)+XYZ(i)*3.66*cos(6*pi*epoch)-XYZ(i)*sin(longitude);
-                end
-            end
-            %recalculate intensity
-            F = norm(XYZ); 
+            % Calculate p from object latitude
+            p = abs(2*latitude/pi); 
+            % Check for an event
+            if rand>p
+                %call m=wrldmagm
+                [XYZ,~,~,~,F] = wrldmagm(height,latitude,longitude,d);
+            else
+                %call wrldmagm*
+                [XYZ,F] = myWrldmagm(P_obj,height,latitude,longitude,d,epoch);
+            end             
         end
+
+        %------------------------myWrldmagm----------------------------%
+        %returns the world magnetic model prediction of the magnetic field
+        %vector and intensity, with an added signal. 
+        function [XYZ,F] = myWrldmagm(P_obj,height,latitude,longitude,d,epoch)
+            %Get the baseline magnetic field
+            [XYZ] = wrldmagm(height,latitude,longitude,d);
+            %Define signal constants 
+            A1 = 0.333; %x axis
+            A2 = 0.455; %y axis
+            A3 = 3.66;  %z axis
+            A = [A1,A2,A3]; 
+            clear A1 A2 A3
+            freq1 = 1.25*pi/1800; %One hour and a quarter
+            freq2 = 5*pi/60; %5 minutes
+            freq3 = 10*2*pi; %10 seconds
+            freq = [freq1,freq2,freq3]; 
+            clear freq1 freq2 freq3
+            %Calculate the contribution to each component
+            Xstar = XYZ(1)*A(1)*(cos(freq(1)*epoch)+cos(freq(1)*latitude));
+            Ystar = XYZ(2)*A(2)*(cos(freq(2)*epoch)+cos(freq(2)*latitude));
+            Zstar = XYZ(3)*A(3)*(cos(freq(3)*epoch)+cos(freq(3)*latitude));
+            %Add Mstar to M
+            XYZ(1) = XYZ(1) + Xstar; 
+            XYZ(2) = XYZ(2) + Ystar;
+            XYZ(3) = XYZ(3) + Zstar;
+            F = norm(XYZ); 
+        end        
     end
 end 

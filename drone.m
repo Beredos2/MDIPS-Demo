@@ -46,8 +46,8 @@ classdef drone<handle
         w       %argument of periapsis (rad)
         M       %mean anomaly
         %-STATE-
-        r       %position (m) throughout time (first calculated in km)
-        v       %velocity (m/s) velocity throughout time (first calculated in km)
+        r       %position (m) throughout time (Orbit propagation occurs in km, but is converted to m)
+        v       %velocity (m/s) velocity throughout time  (Orbit propagation occurs in km, but is converted to m)
         %-SCIENCE-
         D_m     %data storing array, collects magnetic field intensity (nT?) 
     end
@@ -84,7 +84,7 @@ classdef drone<handle
         %getMdata: function that generates data about the state of the 
         %magnetic field around the earth. 
         function getMdata(D_obj,P_obj,C_obj)%D_obj==Drone;P_obj==Planet;C_obj==symClock
-           D_obj.D_m = zeros(length(C_obj.timeline),7);
+           D_obj.D_m = zeros(length(C_obj.timeline),4);
            for j=1:length(D_obj.D_m)
                %Construct rotation matrix
                R_z = [cos(P_obj.Theta_t(j)) sin(P_obj.Theta_t(j)) 0 ; -sin(P_obj.Theta_t(j)) cos(P_obj.Theta_t(j)) 0; 0 0 1];
@@ -96,8 +96,8 @@ classdef drone<handle
                h = r_abs-P_obj.radius*10^3;
                R_ECEFp = [azimuth,elevation,h]; %Drone position in planetary coordinates (longitude,latitude,altitude)
                %Get data
-               [XYZ, H, D, I, F] = planetMagField(P_obj,R_ECEFp(3),R_ECEFp(2),R_ECEFp(1),C_obj.timeline(j,2));
-               D_obj.D_m(j,:) = horzcat(XYZ(1),XYZ(2),XYZ(3),H,D,I,F); 
+               [XYZ,F] = planetMagField(P_obj,R_ECEFp(3),R_ECEFp(2),R_ECEFp(1),C_obj.timeline(j,2));
+               D_obj.D_m(j,:) = horzcat(XYZ(1),XYZ(2),XYZ(3),F); 
            end
         end
     end
