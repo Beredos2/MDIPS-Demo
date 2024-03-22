@@ -85,9 +85,9 @@ classdef swarm < handle
                 dv = cell(height(S_obj.systems)); %buffer to store velocities
                 
                 for i=1:length(dv)
-                    dV_x = normrnd(0.01,0.001,[1,S_obj.systems.dPop(i)]); %km/s
-                    dV_y = normrnd(0.01,0.001,[1,S_obj.systems.dPop(i)]); %km/s
-                    dV_z = normrnd(0.01,0.00001,[1,S_obj.systems.dPop(i)]); %km/s
+                    dV_x = normrnd(0.1,0.001,[1,S_obj.systems.dPop(i)]); %km/s
+                    dV_y = normrnd(0.1,0.001,[1,S_obj.systems.dPop(i)]); %km/s
+                    dV_z = normrnd(0.1,0.001,[1,S_obj.systems.dPop(i)]); %km/s
                     dv{i} = [dV_x;dV_y;dV_z]; 
                 end
                 %2. Add velocity to the V_0 of each drone

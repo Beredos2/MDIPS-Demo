@@ -16,6 +16,7 @@ classdef stereoTaxicSpace < handle
             spaceObj.dl = dl; %Input dependent units
         end
         %GET INDEX: is a function that returns the index of a position R
+        %within the stereotaxic space
         function index = getIndex(R,xbias,ybias,zbias,STS)
             %Modulate
             index = R./STS.dl; 
